@@ -17,23 +17,29 @@ This hook is **not** a form state library.
 
 - No need to learn complex APIs that re-invent state management.
 
-`react-use-validation` listens to state, and runs validation every time that state changes. _You_ decide what to do with the results.
+`react-use-validation` validates state values, then _you_ decide what to do with the results.
 
-### Not just for forms?
+### Not just for forms
 
-Although validating form inputs is the common use-case, there are many other places in an app where validation is necessary.
+Although validating form inputs is a common use-case, there are many other places in an app where validation is necessary.
 
-`react-use-validation` is a simple state validator. Pass it some state, tell it how to validate that state, and let it update you whenever the validity of that state changes.
+`react-use-validation` is a simple state validator. Pass it some state, tell it how to validate that state, and let it tell you whenever the validity of that state changes.
 
 ### Quick start
 
 ```jsx
 const [str, setStr] = React.useState('')
 
-const validation = useValidation({
-  // rule_name: [state_to_validate, function_that_returns_true_or_false]
-  myValidationRule: [str, s => Boolean(s.length)],
-})
+const validation = useValidation(
+  {
+    // rule_name: [state_to_validate, function_that_returns_true_or_false]
+    myValidationRule: [str, s => Boolean(s.length)],
+  },
+  {
+    // Automatic validation when state changes
+    validateOnChange: true,
+  }
+)
 
 return (
   <div>
@@ -81,7 +87,7 @@ The property key defines the rule name, and the value is an array that contains 
 
 ### Get validation results
 
-Access validation results via the `invalid` and `valid` objects returned from the hook. Results are keyed by rule name.
+Access validation results via the `valid` and `invalid` objects returned from the hook. Results are keyed by rule name.
 
 For a rule `myRule`, if `valid.myRule` is `true` then the rule has passed validation, if `invalid.myRule` is `true` then the rule has failed validation, if neither are `true` then the rule has not yet been validated (see [`options.validateOnInit`](###validateOnInit) for an explanation on why validation may not have been run for some rules).
 
@@ -89,7 +95,7 @@ For a rule `myRule`, if `valid.myRule` is `true` then the rule has passed valida
 
 ## Input validation
 
-Validating a single input is as easy as defining a validation rule, and rendering a hint if that rule fails:
+Validating a single input is as easy as defining a validation rule, calling `validate` in `onChange`, and rendering a hint if that rule fails:
 
 ```jsx
 // State
@@ -103,13 +109,20 @@ const validation = useValidation({
 return (
   <div>
     <label>{'Name'}</label>
-    <input value={name} onChange={e => setName(e.target.value)} />
+    <input
+      value={name}
+      onChange={e => {
+        // Validate the new name value
+        validation.validate('nameEntered', e.target.value)
+        setName(e.target.value)
+      }}
+    />
     {validation.invalid.nameEntered && <div>{'Enter a name'}</div>}
   </div>
 )
 ```
 
-> By default, a rule will automatically revalidate every time its state value changes. This can be configured (see [`options.manualValidation`](###manualValidation)).
+`react-use-validation` provides a `validate` function which is used to trigger validation. To validate a rule, call `validate`, passing in the rule name. Alternatively, `react-use-validation` can be configured to automatically revalidate on state change (see [Automatic validation](##Automatic-validation)).
 
 ### Form validation
 
@@ -117,9 +130,11 @@ The real power of `react-use-validation` comes from the ability to define multip
 
 In a form where several fields require validation, we want to validate fields individually as their input values change, but validate all fields together before submission.
 
-`react-use-validation` provides a `validate` function which can be used to trigger validation. Calling `validate` will update the validation result objects, and also returns a boolean `true` for successful validation, or `false` for failed validation.
+Calling `validate` without any arguments will validate all rules.
 
-To validate a form before submission, call `validate` inside your `onSubmit` function, or check the `valid` results object has a `true` value for all rules (note that calling `validate` is preferred as it will also run validation):
+`validate` returns a boolean `true` for successful validation, or `false` for failed validation.
+
+To validate a form before submitting, call `validate` inside your `onSubmit` function, or check the `valid` results object has a `true` value for all rules (note that calling `validate` is preferred as it will also run validation):
 
 ```jsx
 const [name, setName] = React.useState('')
@@ -137,7 +152,7 @@ const onSubmit = e => {
   const isFormValid = validation.validate()
 
   // Alternatively, check that each rule is marked as valid
-  // const isFormValid = validation.valid.nameEntered && validation.valid.emailShape
+  // const isFormValid = Object.values(validation.valid).every(Boolean)
 
   if (isFormValid) {
     // Submit form here...
@@ -148,12 +163,24 @@ return (
   <form onSubmit={onSubmit}>
     <div>
       <label>{'Name'}</label>
-      <input value={name} onChange={e => setName(e.target.value)} />
+      <input
+        value={name}
+        onChange={e => {
+          validation.validate('nameEntered', e.target.value)
+          setName(e.target.value)
+        }}
+      />
       {validation.invalid.nameEntered && <div>{'Enter a name'}</div>}
     </div>
     <div>
       <label>{'Email'}</label>
-      <input value={email} onChange={e => setEmail(e.target.value)} />
+      <input
+        value={email}
+        onChange={e => {
+          validation.validate('emailShape', e.target.value)
+          setEmail(e.target.value)
+        }}
+      />
       {validation.invalid.emailShape && <div>{'Enter a valid email'}</div>}
     </div>
     <button>Submit</button>
@@ -181,41 +208,45 @@ return (
   <div>
     <div>
       <label>{'Password'}</label>
-      <input value={password} onChange={e => setPassword(e.target.value)} />
+      <input
+        value={password}
+        onChange={e => {
+          validation.validate('passwordComplexity', e.target.value)
+          setPassword(e.target.value)
+        }}
+      />
       {validation.invalid.passwordComplexity && (
         <div>{'Password must be at least 8 characters'}</div>
       )}
     </div>
     <div>
       <label>{'Confirm Password'}</label>
-      <input value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
+      <input
+        value={confirmPassword}
+        onChange={e => {
+          validation.validate('passwordMatch', { p: password, cp: e.target.value })
+          setConfirmPassword(e.target.value)
+        }}
+      />
       {validation.invalid.passwordMatch && <div>{'Password does not match'}</div>}
     </div>
   </div>
 )
 ```
 
-> State change is detected through deep value equality, not referential equality, so validation will not run unnecessarily when you pass a new object with the same state values.
+### Automatic validation
 
-## Manual validation
-
-By default, a rule will automatically revalidate every time its state values change, but sometimes you want more control over when validation happens.
-
-This can be achieved by setting the configuration option [`manualValidation`](###manualValidation) to `true`:
+By default, validation only happens when you call `validate`. For convenience, you can automatically revalidate every time state values change by setting the configuration option [`validateOnChange`](###validateOnChange) to `true`:
 
 ```jsx
 const options = {
-  manualValidation: true,
+  validateOnChange: true,
 }
 
 const validation = useValidation(rules, options)
 ```
 
-Now validation will only happen when you call the `validate` function.
-
-Earlier we saw that calling `validate` with no arguments caused validation to run for every rule. `validate` also accepts a rule name as its first argument, and in that case will only validate the specified rule.
-
-Having greater control over validation means we can do things like validate an input on its blur event:
+Now a rule will revalidate every time one of its state values change.
 
 ```jsx
 const [name, setName] = React.useState('')
@@ -225,8 +256,8 @@ const validation = useValidation(
     nameEntered: [name, n => Boolean(n.length)],
   },
   {
-    // Manual validation only
-    manualValidation: true,
+    // Automatic validation when state changes
+    validateOnChange: true,
   }
 )
 
@@ -235,41 +266,8 @@ return (
     <label>{'Name'}</label>
     <input
       value={name}
+      // No need to call validate here
       onChange={e => setName(e.target.value)}
-      // Validate on input blur
-      onBlur={e => validation.validate('nameEntered')}
-    />
-    {validation.invalid.nameEntered && <div>{'Enter a name'}</div>}
-  </div>
-)
-```
-
-It's worth noting that if you are calling `validate` on an input event, the value being used for validation will be the _current_ state value.
-
-This means that if you are calling `validate` during an event that changes the state value, such as inside the `onChange` function, you should pass an up-to-date state value to the `validate` function:
-
-```jsx
-const [name, setName] = React.useState('')
-
-const validation = useValidation(
-  {
-    nameEntered: [name, n => Boolean(n.length)],
-  },
-  {
-    manualValidation: true,
-  }
-)
-
-return (
-  <div>
-    <label>{'Name'}</label>
-    <input
-      value={name}
-      onChange={e => {
-        // Pass e.target.value to prevent validating with stale state
-        validation.validate('nameEntered', e.target.value)
-        setName(e.target.value)
-      }}
     />
     {validation.invalid.nameEntered && <div>{'Enter a name'}</div>}
   </div>
@@ -289,7 +287,7 @@ Default configuration is as follows:
 ```jsx
 {
   validateOnInit: false,
-  manualValidation: false,
+  validateOnChange: false,
 }
 ```
 
@@ -305,15 +303,13 @@ Understandably, this means that on initialization, validation results are not re
 
 If you prefer to always have validation results in sync with state, you can run validation on initialization by setting `validateOnInit` to `true`.
 
-### manualValidation
+### validateOnChange
 
 > Defaults to `false`
 
-By default, a rule will automatically revalidate every time its state values change, but sometimes you want more control over when validation happens.
+By default, validation only happens when you call `validate`. For convenience, you can automatically revalidate every time state values change by setting `validateOnChange` to `true`.
 
-Setting this to `true` prevents any automatic validation based on state change (although `react-use-validation` still caches the changed state).
-
-When using manual validation, validation only happens when you call `validate`.
+> State change is detected through deep value equality, not referential equality, so validation will not run unnecessarily when you pass a new object with the same state values.
 
 [license-badge]: https://img.shields.io/badge/license-Unlicense-blue.svg
 [license]: LICENSE.md

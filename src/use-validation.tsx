@@ -6,12 +6,12 @@ type Rule = [RuleState, (state: RuleState) => boolean]
 
 type Options = {
   validateOnInit?: boolean
-  manualValidation?: boolean
+  validateOnChange?: boolean
 }
 
 const defaultOptions: Options = {
   validateOnInit: false,
-  manualValidation: false,
+  validateOnChange: false,
 }
 
 const useValidation = <TRules extends Record<string, Rule>>(rules: TRules, options?: Options) => {
@@ -100,7 +100,7 @@ const useValidation = <TRules extends Record<string, Rule>>(rules: TRules, optio
         memoizedRuleDepsRef.current = newDeps
       }
 
-      if (!optionsInternal.manualValidation) {
+      if (optionsInternal.validateOnChange) {
         rulesWithChangedDeps.forEach(k => validate(k, newDeps[k]))
       }
     }
