@@ -68,7 +68,7 @@ Import the hook in a component file:
 import useValidation from 'react-use-validation'
 ```
 
-### Define rules
+### Rules
 
 Pass a `rules` object to the hook. Each property of this object defines a single validation rule:
 
@@ -85,7 +85,11 @@ The property key defines the rule name, and the value is an array that contains 
 - The first element is the **state** being validated.
 - The second element is a **function** that receives this state, and returns a boolean, `true` for succesful validation or `false` for failed validation.
 
-### Get validation results
+### Validate
+
+Call the `validate` function to run a validation.
+
+### Results
 
 Access validation results via the `valid` and `invalid` objects returned from the hook. Results are keyed by rule name.
 
@@ -93,7 +97,7 @@ For a rule `myRule`, if `valid.myRule` is `true` then the rule has passed valida
 
 ## Examples
 
-## Input validation
+### Input validation
 
 Validating a single input is as easy as defining a validation rule, calling `validate` in `onChange`, and rendering a hint if that rule fails:
 
