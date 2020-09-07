@@ -11,19 +11,15 @@
   "scripts": {
     "build": "tsc",
     "format": "prettier --write \"src/**/*.tsx\"",
-    "lint": "tslint -p tsconfig.json",
     "prepare": "yarn build",
-    "prepublishOnly": "yarn format && yarn lint && yarn test",
-    "test": "jest --config jestconfig.json"
+    "prepublishOnly": "yarn format"
   },
   "keywords": [
-    "base",
-    "components",
-    "functional",
-    "presentational",
     "react",
-    "stateless",
-    "ui"
+    "hook",
+    "validation",
+    "validate",
+    "state"
   ],
   "author": "Jonathan Madelaine",
   "license": "Unlicense",
