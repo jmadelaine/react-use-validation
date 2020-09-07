@@ -1,4 +1,4 @@
-import useValidation from "./use-validation";
+import useValidation from './use-validation'
 
-export { useValidation };
-export default useValidation;
+export { useValidation }
+export default useValidation
