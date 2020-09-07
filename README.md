@@ -1,4 +1,4 @@
-[![Unlicense License][license-image]][license]
+[![Unlicense License][license-badge]][license]
 [![NPM version][npm-badge]][npm]
 
 # react-use-validation
