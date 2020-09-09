@@ -96,7 +96,7 @@ export const useValidation = <TRules extends Record<string, Rule>>(
       memoizedRuleDepsRef.current = newDeps
     } else {
       const rulesWithChangedDeps = Object.keys(newDeps)
-        .map(k => !deepEqual(memoizedRuleDepsRef.current![k], newDeps[k]) && k)
+        .map(k => !deepEqual(memoizedRuleDepsRef.current![k], newDeps[k], { strict: true }) && k)
         .filter(Boolean) as (keyof TRules)[]
 
       if (rulesWithChangedDeps.length) {
