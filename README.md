@@ -21,7 +21,7 @@ With `react-use-validation`, you can validate the way _you_ want to.
 
 - Define some state.
 - Define a validation rule with a **ruleName**, some **state** to validate, and a **validation function** that takes that state and returns `true` (valid) or `false` (invalid).
-- Run validation whenever you like (or see the [automatic validation example](###Automatic-validation)).
+- Run validation whenever you like (or see the [automatic validation example](#Automatic-validation)).
 - Render a hint for the user if validation fails.
 - Before submitting, run validation against all rules.
 
@@ -105,7 +105,7 @@ Validation can be triggered in several ways:
 - Calling `validate('ruleName')` (passing a _rule name_) will run validation against the specified rule using current state.
 - Calling `validate('ruleName', state)` (passing both a _rule name_ and _state_) will run validation against the specified rule using the passed state.
 
-Alternatively, see [automatic validation](###Automatic-validation).
+Alternatively, see [automatic validation](#Automatic-validation).
 
 ### Inspect results
 
@@ -119,7 +119,7 @@ For a rule "myRule":
 
 Both `valid.myRule === true` and `invalid.myRule === true` can never happen at the same time.
 
-For an explanation as to why results are defined in this way, see "[Why two result objects?](###Why-two-result-objects?)".
+For an explanation as to why results are defined in this way, see "[Why two result objects?](#Why-two-result-objects?)".
 
 ## Configuration
 
@@ -142,7 +142,7 @@ Default configuration is as follows:
 
 > Defaults to `false`
 
-By default, `react-use-validation` does not validate on initialization (see "[Why not validate on initial render?](###Why-not-validate-on-initial-render?)").
+By default, `react-use-validation` does not validate on initialization (see "[Why not validate on initial render?](#Why-not-validate-on-initial-render?)").
 
 To validate on initialization, set `validateOnInit` to `true`.
 
@@ -154,7 +154,7 @@ By default, validation is only triggered by calling the `validate` function.
 
 For convenience, you can set rules to automatically validate every time their state values change by setting `validateOnChange` to `true`.
 
-> State change is detected through deep value equality (not referential equality).
+> State change is detected through strict deep value equality (not referential equality).
 
 ## FAQs
 
@@ -164,11 +164,11 @@ The most common use-case for validation is validating form input values. Most in
 
 To make `react-use-validation` easier to work with, a **validation rule does not run until its state value changes from the initial value**.
 
-You can configure this with [`options.validateOnInit`](###validateOnInit).
+You can configure this with [`options.validateOnInit`](#validateOnInit).
 
 ### Why two result objects?
 
-As validation does not happen on initialization by default (see "[Why not validate on initial render?](###Why-not-validate-on-initial-render?)"), a rule can be in one of three states: **valid**, **invalid**, or **unvalidated**.
+As validation does not happen on initialization by default (see "[Why not validate on initial render?](#Why-not-validate-on-initial-render?)"), a rule can be in one of three states: **valid**, **invalid**, or **unvalidated**.
 
 The most common use-case for reading validation results is to render an error message or user hint. If a result had three possible values (`true`, `false`, or `undefined`) you would need to differentiate between `false` and `undefined` when rendering the error:
 

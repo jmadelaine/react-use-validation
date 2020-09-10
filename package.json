@@ -1,6 +1,6 @@
 {
   "name": "react-use-validation",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "A non-intrusive validation hook for React",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",

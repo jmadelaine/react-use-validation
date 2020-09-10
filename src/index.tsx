@@ -117,11 +117,17 @@ export const useValidation = <TRules extends Record<string, Rule>>(
   }, [...Object.values(rules).map(v => v[0])])
 
   return {
-    ...Object.keys(results).reduce((res, k: keyof TRules) => {
-      res.invalid[k] = results[k] === false
-      res.valid[k] = results[k] === true
-      return res
-    }, {} as { invalid: Record<keyof TRules, boolean>; valid: Record<keyof TRules, boolean> }),
+    ...Object.keys(results).reduce(
+      (res, k: keyof TRules) => {
+        res.invalid[k] = results[k] === false
+        res.valid[k] = results[k] === true
+        return res
+      },
+      { invalid: {}, valid: {} } as {
+        invalid: Record<keyof TRules, boolean>
+        valid: Record<keyof TRules, boolean>
+      }
+    ),
     validate,
   }
 }

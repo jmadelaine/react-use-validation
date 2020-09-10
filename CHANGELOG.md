@@ -1,5 +1,9 @@
 # Changelog
 
+[0.0.4] 2020-09-10
+
+- Fix return value
+
 [0.0.3] 2020-09-10
 
 - Use strict deep equality
