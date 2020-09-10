@@ -84,38 +84,36 @@ export const useValidation = <TRules extends Record<string, Rule>>(
     | undefined
   >(undefined)
 
-  useEffect(() => {
-    const newDeps = Object.keys(rules).reduce(
-      (a, k) => ({ ...a, [k]: rules[k][0] }),
-      {} as {
-        [K in keyof TRules]: TRules[K][0]
-      }
-    )
+  useEffect(
+    () => {
+      const newDeps = Object.keys(rules).reduce(
+        (res, k: keyof TRules) => {
+          res[k] = rules[k][0]
+          return res
+        },
+        {} as {
+          [K in keyof TRules]: TRules[K][0]
+        }
+      )
 
-    if (memoizedRuleDepsRef.current === undefined) {
-      memoizedRuleDepsRef.current = newDeps
-    } else {
-      const rulesWithChangedDeps = Object.keys(newDeps)
-        .map(k => !dequal(memoizedRuleDepsRef.current![k], newDeps[k]) && k)
-        .filter(Boolean) as (keyof TRules)[]
-
-      console.log(rulesWithChangedDeps, memoizedRuleDepsRef.current, newDeps)
-      if (rulesWithChangedDeps.length) {
+      if (memoizedRuleDepsRef.current === undefined) {
         memoizedRuleDepsRef.current = newDeps
-      }
+      } else {
+        const rulesWithChangedDeps = Object.keys(newDeps)
+          .map(k => !dequal(memoizedRuleDepsRef.current![k], newDeps[k]) && k)
+          .filter(Boolean) as (keyof TRules)[]
 
-      if (optionsInternal.validateOnChange) {
-        rulesWithChangedDeps.forEach(k => validate(k, newDeps[k]))
+        if (rulesWithChangedDeps.length) {
+          memoizedRuleDepsRef.current = newDeps
+        }
+        if (optionsInternal.validateOnChange) {
+          rulesWithChangedDeps.forEach(k => validate(k, newDeps[k]))
+        }
       }
-    }
-    /*
-     * Deliberately not including optionsInternal, results, validate, and
-     * memoizedRuleDepsRef as dependencies, as we only want this effect
-     * to run when rule deps change. Once rule deps change, other dependencies
-     * will be up-to-date.
-     */
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [...Object.values(rules).map(v => v[0])])
+    Object.values(rules).map(v => v[0])
+  )
 
   return {
     ...Object.keys(results).reduce(
@@ -124,9 +122,9 @@ export const useValidation = <TRules extends Record<string, Rule>>(
         res.valid[k] = results[k] === true
         return res
       },
-      { invalid: {}, valid: {} } as {
-        invalid: Record<keyof TRules, boolean>
-        valid: Record<keyof TRules, boolean>
+      {
+        invalid: {} as Record<keyof TRules, boolean>,
+        valid: {} as Record<keyof TRules, boolean>,
       }
     ),
     validate,
