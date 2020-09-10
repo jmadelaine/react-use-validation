@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef, Dispatch, SetStateAction } from 'react'
-import deepEqual from 'deep-equal'
+import { dequal } from 'dequal'
 
 type RuleState = any
 type Rule = [RuleState, (state: RuleState) => boolean]
@@ -96,9 +96,10 @@ export const useValidation = <TRules extends Record<string, Rule>>(
       memoizedRuleDepsRef.current = newDeps
     } else {
       const rulesWithChangedDeps = Object.keys(newDeps)
-        .map(k => !deepEqual(memoizedRuleDepsRef.current![k], newDeps[k], { strict: true }) && k)
+        .map(k => !dequal(memoizedRuleDepsRef.current![k], newDeps[k]) && k)
         .filter(Boolean) as (keyof TRules)[]
 
+      console.log(rulesWithChangedDeps, memoizedRuleDepsRef.current, newDeps)
       if (rulesWithChangedDeps.length) {
         memoizedRuleDepsRef.current = newDeps
       }

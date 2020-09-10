@@ -24,7 +24,7 @@
   "author": "Jonathan Madelaine",
   "license": "Unlicense",
   "dependencies": {
-    "deep-equal": "^2.0.3"
+    "dequal": "^2.0.2"
   },
   "peerDependencies": {
     "react": "^16.8.0",
