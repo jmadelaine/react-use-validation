@@ -1,5 +1,9 @@
 # Changelog
 
+[0.0.6] 2020-09-10
+
+- Correct internal state typing
+
 [0.0.5] 2020-09-10
 
 - Replace deep-equal with dequal
