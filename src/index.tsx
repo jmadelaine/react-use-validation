@@ -23,8 +23,8 @@ export const useValidation = <TRules extends Record<string, Rule>>(
   const validateRule = useCallback(
     <TRuleKey extends keyof TRules>(
       ruleKey: TRuleKey,
-      rule: (state: TRules[TRuleKey]) => boolean,
-      state: TRules[TRuleKey],
+      rule: (state: TRules[TRuleKey][0]) => boolean,
+      state: TRules[TRuleKey][0],
       setResultsCallback?: Dispatch<SetStateAction<Record<keyof TRules, boolean | undefined>>>
     ) => {
       if (!rule) {
