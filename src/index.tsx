@@ -132,10 +132,36 @@ export const useValidation = <TRules extends Record<string, Rule>>(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [...Object.keys(results), ...Object.values(results)])
 
+  const isValid = useCallback(
+    <TRuleKey extends keyof TRules>(ruleKey?: TRuleKey) => {
+      if (ruleKey !== undefined) {
+        return results[ruleKey] === true
+      } else {
+        return Object.values(results).every(Boolean)
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [...Object.keys(results), ...Object.values(results)]
+  )
+
+  const isInvalid = useCallback(
+    <TRuleKey extends keyof TRules>(ruleKey?: TRuleKey) => {
+      if (ruleKey !== undefined) {
+        return results[ruleKey] === false
+      } else {
+        return Object.values(results).some(v => !v)
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [...Object.keys(results), ...Object.values(results)]
+  )
+
   return {
     valid,
     invalid,
     validate,
+    isValid,
+    isInvalid,
   }
 }
 
