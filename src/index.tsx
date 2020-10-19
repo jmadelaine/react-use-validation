@@ -31,7 +31,7 @@ export const useValidation = <TRules extends Record<string, Rule>>(
       setResultsCallback?: Dispatch<SetStateAction<Record<keyof TRules, boolean | undefined>>>
     ) => {
       if (!rule) {
-        return undefined
+        return false
       }
       const isValid = Boolean(rule(state))
       if (setResultsCallback) {
@@ -63,12 +63,12 @@ export const useValidation = <TRules extends Record<string, Rule>>(
           .map(k => validateRule(k, rulesRef.current[k][1], rulesRef.current[k][0], setResults))
           .every(Boolean)
       }
-        return validateRule(
-          ruleKey,
-          rulesRef.current[ruleKey][1],
-          state === undefined ? rulesRef.current[ruleKey][0] : state,
-          setResults
-        )
+      return validateRule(
+        ruleKey,
+        rulesRef.current[ruleKey][1],
+        state === undefined ? rulesRef.current[ruleKey][0] : state,
+        setResults
+      )
     },
     [rulesRef, validateRule]
   )
