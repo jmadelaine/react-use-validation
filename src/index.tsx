@@ -44,6 +44,7 @@ export const useValidation = <TRules extends Record<string, Rule>>(
       }
       return isValid
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   )
 
@@ -70,6 +71,7 @@ export const useValidation = <TRules extends Record<string, Rule>>(
         setResults
       )
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [rulesRef, validateRule]
   )
 
