@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef, Dispatch, SetStateAction } from 'react'
+import { useState, useCallback, useEffect, useRef, Dispatch, SetStateAction, useMemo } from 'react'
 import { dequal } from 'dequal'
 
 type RuleState = any
@@ -115,18 +115,26 @@ export const useValidation = <TRules extends Record<string, Rule>>(
     Object.values(rules).map(v => v[0])
   )
 
-  return {
-    ...Object.keys(results).reduce(
+  const [valid, invalid] = useMemo((): [
+    Record<keyof TRules, boolean>,
+    Record<keyof TRules, boolean>
+  ] => {
+    return Object.keys(results).reduce<
+      [Record<keyof TRules, boolean>, Record<keyof TRules, boolean>]
+    >(
       (res, k: keyof TRules) => {
-        res.invalid[k] = results[k] === false
-        res.valid[k] = results[k] === true
+        res[0][k] = results[k] === true
+        res[1][k] = results[k] === false
         return res
       },
-      {
-        invalid: {} as Record<keyof TRules, boolean>,
-        valid: {} as Record<keyof TRules, boolean>,
-      }
-    ),
+      [{} as any, {} as any]
+    )
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [...Object.keys(results), ...Object.values(results)])
+
+  return {
+    valid,
+    invalid,
     validate,
   }
 }
