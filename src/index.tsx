@@ -20,6 +20,9 @@ export const useValidation = <TRules extends Record<string, Rule>>(
 ) => {
   const optionsInternal = { ...defaultOptions, ...options }
 
+  const rulesRef = useRef(rules)
+  rulesRef.current = rules
+
   const validateRule = useCallback(
     <TRuleKey extends keyof TRules>(
       ruleKey: TRuleKey,
@@ -53,11 +56,6 @@ export const useValidation = <TRules extends Record<string, Rule>>(
       return res
     }, {} as Record<keyof TRules, boolean | undefined>)
   )
-
-  const rulesRef = useRef(rules)
-  useEffect(() => {
-    rulesRef.current = rules
-  }, [rules, rulesRef])
 
   const validate = useCallback(
     <TRuleKey extends keyof TRules>(ruleKey?: TRuleKey, state?: TRules[TRuleKey][0]) => {
