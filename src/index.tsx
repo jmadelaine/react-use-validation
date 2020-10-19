@@ -38,9 +38,8 @@ export const useValidation = <TRules extends Record<string, Rule>>(
         setResultsCallback(prev => {
           if (prev[ruleKey] === isValid) {
             return prev
-          } else {
-            return { ...prev, [ruleKey]: isValid }
           }
+          return { ...prev, [ruleKey]: isValid }
         })
       }
       return isValid
@@ -59,18 +58,17 @@ export const useValidation = <TRules extends Record<string, Rule>>(
 
   const validate = useCallback(
     <TRuleKey extends keyof TRules>(ruleKey?: TRuleKey, state?: TRules[TRuleKey][0]) => {
-      if (ruleKey !== undefined) {
+      if (ruleKey === undefined) {
+        return Object.keys(rulesRef.current)
+          .map(k => validateRule(k, rulesRef.current[k][1], rulesRef.current[k][0], setResults))
+          .every(Boolean)
+      }
         return validateRule(
           ruleKey,
           rulesRef.current[ruleKey][1],
           state === undefined ? rulesRef.current[ruleKey][0] : state,
           setResults
         )
-      } else {
-        return Object.keys(rulesRef.current)
-          .map(k => validateRule(k, rulesRef.current[k][1], rulesRef.current[k][0], setResults))
-          .every(Boolean)
-      }
     },
     [rulesRef, validateRule]
   )
@@ -115,11 +113,10 @@ export const useValidation = <TRules extends Record<string, Rule>>(
 
   const isValid = useCallback(
     <TRuleKey extends keyof TRules>(ruleKey?: TRuleKey) => {
-      if (ruleKey !== undefined) {
-        return results[ruleKey] === true
-      } else {
+      if (ruleKey === undefined) {
         return Object.values(results).every(Boolean)
       }
+      return results[ruleKey] === true
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [...Object.keys(results), ...Object.values(results)]
@@ -127,11 +124,10 @@ export const useValidation = <TRules extends Record<string, Rule>>(
 
   const isInvalid = useCallback(
     <TRuleKey extends keyof TRules>(ruleKey?: TRuleKey) => {
-      if (ruleKey !== undefined) {
-        return results[ruleKey] === false
-      } else {
+      if (ruleKey === undefined) {
         return Object.values(results).some(v => !v)
       }
+      return results[ruleKey] === false
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [...Object.keys(results), ...Object.values(results)]
