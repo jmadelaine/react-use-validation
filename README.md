@@ -11,11 +11,7 @@ Wouldn't it be great if there was a way to validate form fields without delegati
 
 This hook is **not** a form state library.
 
-- No need to attach refs or spread props on input components.
-- No need to learn complex APIs that re-invent state management.
-- No need to bloat JSX with validation configuration.
-
-With `react-use-validation`, you can validate the way _you_ want to.
+There's no need to attach refs or spread props on input components, learn complex state management APIs, or bloat JSX with validation configuration.
 
 ### Quick start
 
@@ -53,7 +49,7 @@ return (
       }}
     />
     {/* Render a hint if validation fails for a specific rule */}
-    {validation.invalid.myValidationRule && <div>{'Please enter something'}</div>}
+    {validation.isInvalid('myValidationRule') && <div>{'Please enter something'}</div>}
   </form>
 )
 ```
@@ -97,7 +93,7 @@ A rule is defined as an array containing two elements:
 
 ### Validate
 
-The hook returns a `validate` function that can be used to run validation.
+The hook returns a [`validate`](#validate) function that can be used to run validation.
 
 Validation can be triggered in several ways:
 
@@ -109,17 +105,15 @@ Alternatively, see [automatic validation](#Automatic-validation).
 
 ### Inspect results
 
-The hook returns a `valid` object and an `invalid` object that contain validation results. Results are keyed by rule name.
+The hook returns an [`isValid`](#isValid) function and an [`isInvalid`](#isInvalid) function that can be used to get validation results.
 
 For a rule "myRule":
 
-- If `valid.myRule === true` the rule is valid.
-- If `invalid.myRule === true` the rule is invalid.
-- If `valid.myRule === false && invalid.myRule === false` the rule has not yet been validated.
+- If `isValid('myRule') === true` the rule is valid.
+- If `isInvalid('myRule') === true` the rule is invalid.
+- If `isValid('myRule') === false && isInvalid('myRule') === false` the rule has not yet been validated.
 
-Both `valid.myRule === true` and `invalid.myRule === true` can never happen at the same time.
-
-For an explanation as to why results are defined in this way, see "[Why two result objects?](#Why-two-result-objects?)".
+For an explanation as to why results are defined in this way, see "[Why two result functions?](#Why-two-result-function?)".
 
 ## Configuration
 
@@ -156,17 +150,54 @@ For convenience, you can set rules to automatically validate every time their st
 
 > State change is detected through strict deep value equality (not referential equality).
 
+## API
+
+`react-use-validation` returns an object with the following members:
+
+### isValid
+
+A function that accepts an optional rule name `string` and returns a `boolean` that determines if the rule/rules are valid. If a rule name is provided, only the specified rule will be checked. If no rule name is provided, all rules will be checked.
+
+Executing this function does not run validation.
+
+```typescript
+const isValid: <TRuleKey extends keyof TRules>(ruleKey?: TRuleKey | undefined) => boolean
+```
+
+### isInvalid
+
+A function that accepts an optional rule name `string` and returns a `boolean` that determines if the rule/rules are invalid. If a rule name is provided, only the specified rule will be checked. If no rule name is provided, all rules will be checked.
+
+Executing this function does not run validation.
+
+```typescript
+const isInvalid: <TRuleKey extends keyof TRules>(ruleKey?: TRuleKey | undefined) => boolean
+```
+
+### validate
+
+A function that accepts an optional rule name `string` and an optional value to validate the rule against, and returns a `boolean` that determines if the rule/rules are valid (`true`) or invalid (`false`). If a rule name is provided, only the specified rule will be validated. If a value is provided, the specified rule will be validated using the supplied value. If no rule name is provided, all rules will be validated using current state values.
+
+Executing this function runs validation and may update state.
+
+```typescript
+const validate: <TRuleKey extends keyof TRules>(
+  ruleKey?: TRuleKey | undefined,
+  state?: TRules[TRuleKey][0] | undefined
+) => boolean
+```
+
 ## FAQs
 
 ### Why not validate on initial render?
 
-The most common use-case for validation is validating form input values. Most input values are invalid (empty) by default, so validating everything on initial render means a user sees lots of error messages without ever touching a form.
+The most common use-case for validation is validating form input values. Most input values are invalid (empty) by default, so validating everything on initial render means a user sees error messages before they do anything.
 
 To make `react-use-validation` easier to work with, a **validation rule does not run until its state value changes from the initial value**.
 
 You can configure this with [`options.validateOnInit`](#validateOnInit).
 
-### Why two result objects?
+### Why two result functions?
 
 As validation does not happen on initialization by default (see "[Why not validate on initial render?](#Why-not-validate-on-initial-render?)"), a rule can be in one of three states: **valid**, **invalid**, or **unvalidated**.
 
@@ -174,16 +205,16 @@ The most common use-case for reading validation results is to render an error me
 
 ```jsx
 // Strict equality check is required
-validation.results.nameEntered === false && <div>{'Enter a name'}</div>
+validation.getResult('nameEntered') === false && <div>{'Enter a name'}</div>
 ```
 
 Instead, with the current implementation we can write:
 
 ```jsx
-validation.invalid.nameEntered && <div>{'Enter a name'}</div>
+validation.isInvalid('nameEntered') && <div>{'Enter a name'}</div>
 ```
 
-The first example is more verbose, and may lead into the trap of writing `!validation.results.myRule` which would incorrectly render an error if validation had not run (validation result of `undefined`).
+The first example is more verbose, and may lead into the trap of writing `!validation.getResult('nameEntered')` which would incorrectly render an error if validation had not run (validation result of `undefined`).
 
 The current implementation is more declarative, shorter, and easier to read.
 
@@ -212,7 +243,7 @@ return (
         setName(e.target.value)
       }}
     />
-    {validation.invalid.nameEntered && <div>{'Enter a name'}</div>}
+    {validation.isInvalid('nameEntered') && <div>{'Enter a name'}</div>}
   </div>
 )
 ```
@@ -223,7 +254,7 @@ In a form where several fields require validation, we want to validate fields in
 
 `validate` returns a boolean `true` for successful validation, or `false` for failed validation.
 
-Call `validate` inside your `onSubmit` function, or check the `valid` results object has a `true` value for all rules (note that calling `validate` is preferred as this also triggers validation):
+Call `validate` inside your `onSubmit` function, or call the `isValid` function or `validate` function (note that calling `validate` is preferred as this also triggers validation):
 
 ```jsx
 const [name, setName] = React.useState('')
@@ -240,8 +271,8 @@ const onSubmit = e => {
   // Validate all rules before submitting
   const isFormValid = validation.validate()
 
-  // Alternatively, check that each rule is marked as valid
-  // const isFormValid = Object.values(validation.valid).every(Boolean)
+  // Alternatively, check that all rules are marked as valid
+  // const isFormValid = validation.isValid()
 
   if (isFormValid) {
     // Submit form here...
@@ -260,7 +291,7 @@ return (
           setName(e.target.value)
         }}
       />
-      {validation.invalid.nameEntered && <div>{'Enter a name'}</div>}
+      {validation.isInvalid('nameEntered') && <div>{'Enter a name'}</div>}
     </div>
     <div>
       <label>{'Email'}</label>
@@ -272,7 +303,7 @@ return (
           setEmail(e.target.value)
         }}
       />
-      {validation.invalid.emailShape && <div>{'Enter a valid email'}</div>}
+      {validation.isInvalid('emailShape') && <div>{'Enter a valid email'}</div>}
     </div>
     <button>Submit</button>
   </form>
@@ -306,7 +337,7 @@ return (
           setPassword(e.target.value)
         }}
       />
-      {validation.invalid.passwordComplexity && (
+      {validation.isInvalid('passwordComplexity') && (
         <div>{'Password must be at least 8 characters'}</div>
       )}
     </div>
@@ -320,7 +351,7 @@ return (
           setConfirmPassword(e.target.value)
         }}
       />
-      {validation.invalid.passwordMatch && <div>{'Password does not match'}</div>}
+      {validation.isInvalid('passwordMatch') && <div>{'Password does not match'}</div>}
     </div>
   </div>
 )
@@ -328,7 +359,7 @@ return (
 
 ### Automatic validation
 
-With automatic validation, there's no need to call `validate` in the `onChange` function:
+With automatic validation, there's no need to call `validate` in the `onChange` function (when validating prior to form submission, `validate` should still be called).
 
 ```jsx
 const [name, setName] = React.useState('')
@@ -351,7 +382,7 @@ return (
       // No need to call validate here
       onChange={e => setName(e.target.value)}
     />
-    {validation.invalid.nameEntered && <div>{'Enter a name'}</div>}
+    {validation.isInvalid('nameEntered') && <div>{'Enter a name'}</div>}
   </div>
 )
 ```

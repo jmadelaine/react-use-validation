@@ -1,5 +1,11 @@
 # Changelog
 
+[0.0.7] 2020-10-19
+
+- Add `isValid` and `isInvalid` functions
+- Remove `valid` and `invalid` result objects
+- Return `false` if rule is undefined
+
 [0.0.6] 2020-09-10
 
 - Correct internal state typing
