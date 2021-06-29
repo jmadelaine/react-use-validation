@@ -127,7 +127,7 @@ export const useValidation = <TRules extends Record<string, Rule>>(
   const isInvalid = useCallback(
     <TRuleKey extends keyof TRules>(ruleKey?: TRuleKey) => {
       if (ruleKey === undefined) {
-        return Object.values(results).some(v => !v)
+        return Object.values(results).some(v => v === false)
       }
       return results[ruleKey] === false
     },

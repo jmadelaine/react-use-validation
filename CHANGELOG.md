@@ -1,5 +1,9 @@
 # Changelog
 
+[0.0.8] 2021-06-29
+
+- Fix bug where `isInvalid()` returns `true` if validation has not yet happened
+
 [0.0.7] 2020-10-19
 
 - Add `isValid` and `isInvalid` functions
